@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from DbHandler import *
+from DbHandler.DbHandler import DbHandler
+
 class SystemDbHandler:
     def __init__(self):
         self.system_DbHandler = DbHandler()
@@ -8,9 +9,9 @@ class SystemDbHandler:
 
     def read_tenant_db_names(self):
         cursor = self.db.cursor()
-        cursor.execute("SELECT * FROM websites")
-        return cursor.fetchall()
+        cursor.execute("SELECT uuid FROM websites")
+        return [item[0] for item in cursor.fetchall()]
 
 
 # DbHandler = SystemDbHandler()
-# DbHandler.read_tenant_db_names()
+# print(DbHandler.read_tenant_db_names())

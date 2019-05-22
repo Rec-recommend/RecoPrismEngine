@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from DbHandler import *
+from DbHandler.DbHandler import DbHandler
 
 class TenantDbHandler:
     def __init__(self , DB_name):
@@ -10,18 +10,22 @@ class TenantDbHandler:
 
     def get_tables(self):
         cursor = self.db.cursor()
-        cursor.execute("SELECT * FROM configs where target = table")
-        return cursor.fetchall()
+        cursor.execute("SELECT name FROM configs where target = 'table'")
+        return [item[0] for item in cursor.fetchall()]
 
-    def get_columns(self):
+    def get_columns(self,table_name):
         cursor = self.db.cursor()
-        cursor.execute("SELECT * FROM configs where target = column")
+        cursor.execute(f"SELECT name , weight  FROM configs where target = 'column' and  `table` = '{table_name}' and used = 1")
         return cursor.fetchall()
 
     def get_table_data(self , table_name):
         cursor = self.db.cursor()
-        cursor.execute(f"SELECT * FROM {table_name} where target = column")
-        return cursor.fetchall()
+        cursor.execute(f"SELECT * FROM {table_name}")
+        return {
+            "column_names": cursor.column_names,
+            "data": cursor.fetchall()
+            }
+
 
 
 # DbHandler = TenantDbHandler('cart-on-rails')
