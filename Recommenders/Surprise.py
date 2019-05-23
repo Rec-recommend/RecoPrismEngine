@@ -9,10 +9,15 @@ from surprise import Reader
 from surprise.model_selection import train_test_split
 
 # from MovieLens import MovieLens
+# to_raw_uid: if we have an array of 600 unique users,
+# trainset.to_raw_uid(10) will get the userid(mysql) of the tenth unique user
+# helpul to convert from the trainset matrix to the msql_id
+# to_raw(num)  ==> from row to msql_id
+# to_inner('num')  ==> from msql_id to row id
 
 class CollborativeRecommender():
 	def __init__(self, df, line_format):
-		reader = Reader(line_format=line_format, rating_scale=(0, 5), skip_lines=1)
+		reader = Reader(rating_scale=(0, 5), skip_lines=1, sep=' ')
 		dataset = Dataset.load_from_df(df, reader)
 		self.trainset = dataset.build_full_trainset()
 		self.similarity_matrix = []
@@ -25,19 +30,19 @@ class CollborativeRecommender():
 		algo.fit(self.trainset)
 		self.similarity_matrix = algo.compute_similarities()
 
-	def get_similar_users(self, uid):
+	def get_similar_users(self, msql_id):
+		user_inner_id = self.trainset.to_inner_uid(msql_id)
 		similar_users = []
-		user_similarity_matrix = self.similarity_matrix[uid]
-
+		user_similarity_matrix = self.similarity_matrix[user_inner_id]
 
 		for index, similarity in enumerate(user_similarity_matrix):
-			similar_users.append([int(self.trainset.to_raw_uid(index))-1, similarity])
+			similar_users.append([int(self.trainset.to_raw_uid(index)), similarity])
 
-		return sorted(similar_users, key=lambda tup: tup[1], reverse=True)
+		return sorted(similar_users, key=lambda tup: tup[1], reverse=True)[:10]
 
 
-# file_path = "ratings.csv"
-# line_format = 'user item rating timestamp'
+# file_path = "./Recommenders/ratings.csv"
+# line_format = 'item user rating timestamp'
 # sim_options = {'name': 'pearson_baseline', 'user_based': True}
 
 # cfr = CollborativeRecommender(file_path, line_format)
@@ -47,7 +52,10 @@ class CollborativeRecommender():
 # print(cfr.get_similar_users(2))
 
 
-
+# def __init__(self, file_path, line_format):
+# 		reader = Reader(line_format=line_format, rating_scale=(0, 5), skip_lines=1, sep=',')
+# 		dataset = Dataset.load_from_file(file_path, reader)
+		
 
 
 
