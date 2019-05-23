@@ -11,9 +11,9 @@ from surprise.model_selection import train_test_split
 # from MovieLens import MovieLens
 
 class CollborativeRecommender():
-	def __init__(self, file_path, line_format):
-		reader = Reader(line_format=line_format, rating_scale=(0, 5), skip_lines=1, sep=',')
-		dataset = Dataset.load_from_file(file_path, reader)
+	def __init__(self, df, line_format):
+		reader = Reader(line_format=line_format, rating_scale=(0, 5), skip_lines=1)
+		dataset = Dataset.load_from_df(df, reader)
 		self.trainset = dataset.build_full_trainset()
 		self.similarity_matrix = []
 
@@ -36,15 +36,15 @@ class CollborativeRecommender():
 		return sorted(similar_users, key=lambda tup: tup[1], reverse=True)
 
 
-file_path = "ratings.csv"
-line_format = 'user item rating timestamp'
-sim_options = {'name': 'pearson_baseline', 'user_based': True}
+# file_path = "ratings.csv"
+# line_format = 'user item rating timestamp'
+# sim_options = {'name': 'pearson_baseline', 'user_based': True}
 
-cfr = CollborativeRecommender(file_path, line_format)
-cfr.set_sim_options(sim_options)
-cfr.calc_sim_matrix()
+# cfr = CollborativeRecommender(file_path, line_format)
+# cfr.set_sim_options(sim_options)
+# cfr.calc_sim_matrix()
 
-print(cfr.get_similar_users(2))
+# print(cfr.get_similar_users(2))
 
 
 
