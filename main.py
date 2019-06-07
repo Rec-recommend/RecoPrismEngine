@@ -14,13 +14,10 @@ def prepare_df(table):
     return df
 
 # =====================================================
-
-
-tenant = TenantDbHandler('test_eav')
-items_table = tenant.get_eav_table('items')
+tenant = TenantDbHandler('tn_GfxfFrKRovHKGJ4PNr4lOArxQNQEb')
+items_table = tenant.get_pivot_table('ratings')
 df = prepare_df(items_table)
-
-print(df.head())
+print(df.head(20))
 
 # line_format = 'user item rating'
 # sim_options = {'name': 'cosine', 'user_based': True, 'min_support': 20}
