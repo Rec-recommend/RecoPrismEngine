@@ -1,2 +1,5 @@
-*/__pycache__/
+**/__pycache__/
+./temp
 .env
+.vscode
+XDG_CACHE_HOME

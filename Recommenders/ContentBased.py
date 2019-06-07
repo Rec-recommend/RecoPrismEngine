@@ -9,6 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 class ContentBasedRecommender():
     def __init__(self, file_path, features):
         self.df       = pd.read_csv(file_path)
+        # self.df = self.df[self.df.index.isin([1,2,4])]
         self.features = features
         self.cosine_sim_matrix = []
 
@@ -63,23 +64,26 @@ class ContentBasedRecommender():
 
 
 # ##################################################
-# file_path = "movie_dataset.csv"
-# item_name = "Skyfall"
+file_path = "./Recommenders/movie_dataset.csv"
+item_name = "Skyfall"
 
-# features = [
-#     {"name": "genres", "weight": 1},
-#     {"name": "director", "weight": 1},
-#     {"name": "cast", "weight": 1},
-#     {"name": "keywords", "weight": 1},
-# ]
+features = [
+    {"name": "genres", "weight": 1},
+    {"name": "director", "weight": 1},
+    {"name": "cast", "weight": 1},
+    {"name": "keywords", "weight": 1},
+]
 
-# rec = ContentBasedRecommender(file_path, features)
-# rec.calc_cosine_sim_matrix()
-# rec.get_similar_items(item_name)
+rec = ContentBasedRecommender(file_path, features)
+rec.calc_cosine_sim_matrix()
+rec.get_similar_items(item_name)
 
-# i = 0
-# for element in rec.get_similar_items(item_name):
-#     print(rec.get_title_from_index(element[0]),"--- sim score: ", (str(element[1])[:5]))
-#     i = i+1
-#     if i > 50:
-#         break
+i = 0
+for element in rec.get_similar_items(item_name):
+    print(rec.get_title_from_index(element[0]),"--- sim score: ", (str(element[1])[:5]))
+    i = i+1
+    if i > 50:
+        break
+
+
+#To select rows whose column value is in list
