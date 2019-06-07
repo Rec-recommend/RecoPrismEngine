@@ -34,12 +34,12 @@ print(df.head(20))
 
 
 line_format = 'user item rating'
-sim_options = {'name': 'pearson_baseline', 'user_based': True, 'min_support': 5}
+sim_options = {'name': 'pearson_baseline', 'user_based': True, 'min_support': 15}
 
 cfr = CollborativeRecommender(sim_options, df, line_format)
 
 
-movies = ['2']
+movies = ['115617', '2424', '54001', '88163']
 
 for movie in movies:
 	res = cfr.get_recommendations(movie)
