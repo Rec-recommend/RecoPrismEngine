@@ -1,10 +1,10 @@
-from CF.CFAlgo import CFAlgo
+from Recommenders.CF.CFAlgo import CFAlgo
 import numpy as np
 
 class CFUserBased(CFAlgo):
 
     def __get_similar_users(self, user_raw_id, trainset, similarity_matrix):
-        user_inner_id 		   = trainset.to_inner_uid(str(user_raw_id))
+        user_inner_id 		   = trainset.to_inner_uid(int(user_raw_id))
         user_similarity_matrix = similarity_matrix[user_inner_id]
         similar_users 		   = []
 
@@ -19,7 +19,7 @@ class CFUserBased(CFAlgo):
         for user in similar_users:
             user_raw_id     = str(user[0])
             user_similarity = user[1]
-            user_ratings    = trainset.ur[int(trainset.to_inner_uid(user_raw_id))]
+            user_ratings    = trainset.ur[int(trainset.to_inner_uid(int(user_raw_id)))]
             user_avg_rating = np.average(np.array(user_ratings), axis=0)[1]
             for user_rating in user_ratings:
                 user_rating_value = user_rating[1]

@@ -1,4 +1,4 @@
-from CF.CFAlgoFactory import CFAlgoFactory
+from Recommenders.CF.CFAlgoFactory import CFAlgoFactory
 from surprise import KNNWithMeans, KNNBasic, SVD, NMF
 from surprise import Dataset
 from surprise import accuracy
@@ -8,9 +8,9 @@ import pandas as pd
 
 
 class CollborativeRecommender():
-    def __init__(self, sim_options, file_path, line_format):
-        reader = Reader(line_format=line_format, skip_lines=1, sep=',')
-        dataset = Dataset.load_from_file(file_path, reader)
+    def __init__(self, sim_options, df, line_format):
+        reader = Reader(line_format=line_format, skip_lines=1, sep=' ')
+        dataset = Dataset.load_from_df(df, reader)
         self.trainset 		   = dataset.build_full_trainset()
         self.similarity_matrix = []
         self.set_cf_type(sim_options)

@@ -1,11 +1,11 @@
-from CF.CFAlgo import CFAlgo
+from Recommenders.CF.CFAlgo import CFAlgo
 import numpy as np
 import pandas as pd
 
 class CFItemBased(CFAlgo):
 
     def get_recommendations(self, item_raw_id, trainset, similarity_matrix):
-        item_inner_id 			= trainset.to_inner_iid(str(item_raw_id))
+        item_inner_id 			= trainset.to_inner_iid(int(item_raw_id))
         items_similarity_matrix = similarity_matrix[item_inner_id]
         similar_items 			= []
 

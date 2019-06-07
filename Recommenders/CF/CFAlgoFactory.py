@@ -1,5 +1,5 @@
-from CF.CFItemBased import CFItemBased
-from CF.CFUserBased import CFUserBased
+from Recommenders.CF.CFItemBased import CFItemBased
+from Recommenders.CF.CFUserBased import CFUserBased
 class CFAlgoFactory():
 	@staticmethod
 	def get_cf_algo(sim_options):
