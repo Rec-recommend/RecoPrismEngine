@@ -1,23 +1,15 @@
 #!/usr/bin/env python3
 
 from DbHandler.TenantDbHandler import TenantDbHandler
-from Recommenders.CollborativeRecommender import CollborativeRecommender
+import turicreate as tc
 import pandas as pd
 from pymongo import MongoClient
+from turicreate import SFrame
+import math
+tenant_db_name = 'tn_aLesW8s8DApiuVo8S49QuNdZ3K6kc'
 
-tenant_db_name = 'tn_GfxfFrKRovHKGJ4PNr4lOArxQNQEb'
-
-# =====================================================
-# Helper functions: dict for movies names and ids
-# -----------------------------------------------------
-movies_df = pd.read_csv('./Recommenders/movies.csv')
-movieID_to_name = {}
-
-for index, row in movies_df.iterrows():
-	movieID = int(row[0])
-	movieName = row[1]
-	movieID_to_name[movieID] = movieName
-
+# import sys
+# tenant_db_name = sys.argv[1]
 
 # =====================================================
 # store table in a dataframe
@@ -32,53 +24,25 @@ def prepare_df(table):
 # load data from mysql and train the model
 # -----------------------------------------------------
 tenant = TenantDbHandler(tenant_db_name)
-items_table = tenant.get_pivot_table('ratings')
-df = prepare_df(items_table)
+df 	   = prepare_df(tenant.get_pivot_table('ratings'))
 
-
-line_format = 'user item rating'
-sim_options = {'name': 'pearson_baseline', 'user_based': True, 'min_support': 7}
-
-cfr = CollborativeRecommender(sim_options, df, line_format)
-
+train_data = tc.SFrame(df)
+m = tc.item_similarity_recommender.create(train_data, user_id='end_user_id', item_id='item_id', target='value',)
 
 # =====================================================
 # get users recommendations and store them in mongodb
 # -----------------------------------------------------
-users = df['end_user_id'].unique()
 mongo_client = MongoClient()
-mongo_db = mongo_client[tenant_db_name]
-count = 0
-recos = []
+mongo_db = mongo_client['recoprism']
+collection = tenant_db_name + "_users"
+
+users = train_data['end_user_id'].unique()
+mongo, count = [], 0
+chuck_size = math.ceil(len(users)/10)
 for user in users:
-    res = cfr.get_recommendations(user)
-    recos.append({'user_id':int(user), 'recommendations':[i[0] for i in res]})
-    count += 1
-    if count > 100000:
-        mongo_db.recommendations.insert_many(recos)
-        count = 0
-        recos = []
-
-# # =====================================================
-
-
-
-# import sys
-# db_name = sys.argv[1]
-# print(t.get_eav_table("items"))
-# file_path = "./Recommenders/ratings.1.csv"
-# cfr = CollborativeRecommender(sim_options, file_path, line_format)
-
-# =====================================================
-# SELECT value FROM `iav` WHERE attribute_id = 1 AND item_id in (SELECT `item_id` FROM `ratings` WHERE end_user_id = 360 AND value = 5);
-# SELECT value FROM `iav` WHERE item_id = 8864 AND attribute_id = 1
-
-
-# users = ['611','612', '613']
-
-# for user in users:
-# 	res = cfr.get_recommendations(user)
-# 	for movie in res:
-# 		print(movieID_to_name[movie[0]] , " ---- " , movie[1])
-# 	print("--------------------------------------")
-
+	recos = m.recommend(users=[user],k=20)
+	mongo.append({'user_id':int(user), 'items':list(recos['item_id'])})
+	count += 1
+	if count % chuck_size == 0:
+		mongo_db[collection].insert_many(mongo)
+		mongo = []

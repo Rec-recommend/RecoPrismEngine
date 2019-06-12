@@ -1,2 +1,0 @@
-class Recommender(object):
-    pass
