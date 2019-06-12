@@ -6,18 +6,22 @@ import pandas as pd
 from pymongo import MongoClient
 from turicreate import SFrame
 import math
-tenant_db_name = 'tn_aLesW8s8DApiuVo8S49QuNdZ3K6kc'
+import sys
 
-# import sys
-# tenant_db_name = sys.argv[1]
+
+tenant_db_name = sys.argv[1]
 
 # =====================================================
 # store table in a dataframe
 # -----------------------------------------------------
 def prepare_df(table):
-    df = pd.DataFrame(table['data'])
-    df.columns = table['column_names']
-    return df
+	try:
+		df = pd.DataFrame(table['data'])
+		df.columns = table['column_names']
+	except:
+		pass
+
+	return df
 
 
 # =====================================================
@@ -25,6 +29,9 @@ def prepare_df(table):
 # -----------------------------------------------------
 tenant = TenantDbHandler(tenant_db_name)
 df 	   = prepare_df(tenant.get_pivot_table('ratings'))
+
+if df.empty:
+	exit()
 
 train_data = tc.SFrame(df)
 m = tc.item_similarity_recommender.create(train_data, user_id='end_user_id', item_id='item_id', target='value',)
