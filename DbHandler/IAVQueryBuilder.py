@@ -5,7 +5,7 @@ class IAVQueryBuilder:
 
     def __init__(self, entity_name):
         self.entity_name = entity_name
-        self.select_part = "Select iav1.id,"
+        self.select_part = "Select iav1.item_id,"
         self.from_part = " FROM "
         self.where_part = " WHERE "
         self.table_count = 0

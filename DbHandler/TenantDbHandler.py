@@ -32,7 +32,7 @@ class TenantDbHandler:
         cursor.execute(q)
 
         data = cursor.fetchall()
-        labels.insert(0, 'id')
+        labels.insert(0, 'item_id')
         weights.insert(0, 0)
         return {
             "column_names": labels,

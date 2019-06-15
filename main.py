@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from DbHandler.TenantDbHandler import TenantDbHandler
+from Recommenders.ContentBased import ContentBasedRecommender
 import turicreate as tc
 import pandas as pd
 from pymongo import MongoClient
@@ -27,13 +28,36 @@ def prepare_df(table):
 # =====================================================
 # load data from mysql and train the model
 # -----------------------------------------------------
-tenant = TenantDbHandler(tenant_db_name)
-df 	   = prepare_df(tenant.get_pivot_table('ratings'))
+tenant_handler = TenantDbHandler(tenant_db_name)
+df 	   		   = prepare_df(tenant_handler.get_pivot_table('ratings'))
 
 if df.empty:
 	exit()
 
-train_data = tc.SFrame(df)
+train_data = tc.Sframe(df)
+
+# =====================================================
+# Content Based Algorithm Usage
+# -----------------------------------------------------
+
+# df = prepare_df(tenant_handler.get_iav_table())
+
+# if df.empty:
+# 	exit()
+
+# features = []
+# labels  = tenant_handler.get_iav_attributes('label')
+# weights = tenant_handler.get_iav_attributes('weight')
+
+# for (label, weight) in zip(labels, weights):
+# 	features.append({"label": label, "weight": int(weight)})
+
+# rec = ContentBasedRecommender(df, features)
+
+# rec.calc_cosine_sim_matrix()
+
+# res = rec.get_similar_items(72998)
+
 m = tc.item_similarity_recommender.create(train_data, user_id='end_user_id', item_id='item_id', target='value',)
 
 # =====================================================
