@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from DbHandler.TenantDbHandler import TenantDbHandler
+from DbHandler.MongoHandler import MongoHandler
 from Recommenders.ContentBased import ContentBasedRecommender
 import turicreate as tc
 import pandas as pd
@@ -28,52 +29,49 @@ def prepare_df(table):
 # =====================================================
 # load data from mysql and train the model
 # -----------------------------------------------------
+mongo_handler  = MongoHandler(tenant_db_name)
 tenant_handler = TenantDbHandler(tenant_db_name)
 df 	   		   = prepare_df(tenant_handler.get_pivot_table('ratings'))
 
 if df.empty:
 	exit()
 
-train_data = tc.Sframe(df)
+train_data = tc.SFrame(df)
+
+
+# m = tc.item_similarity_recommender.create(train_data, user_id='end_user_id', item_id='item_id', target='value',)
+
+# =====================================================
+# get users recommendations and store them in mongodb
+# -----------------------------------------------------
+
+# users = train_data['end_user_id'].unique()
+
+# mongo_handler.insert_chunk("users",users,m)
 
 # =====================================================
 # Content Based Algorithm Usage
 # -----------------------------------------------------
 
-# df = prepare_df(tenant_handler.get_iav_table())
+df = prepare_df(tenant_handler.get_iav_table())
+if df.empty:
+	exit()
 
-# if df.empty:
-# 	exit()
+features = []
+labels   = tenant_handler.get_iav_attributes('label')
+weights  = tenant_handler.get_iav_attributes('weight')
 
-# features = []
-# labels  = tenant_handler.get_iav_attributes('label')
-# weights = tenant_handler.get_iav_attributes('weight')
+for (label, weight) in zip(labels, weights):
+	features.append({"label": label, "weight": int(weight)})
 
-# for (label, weight) in zip(labels, weights):
-# 	features.append({"label": label, "weight": int(weight)})
+rec = ContentBasedRecommender(df, features)
 
-# rec = ContentBasedRecommender(df, features)
-
-# rec.calc_cosine_sim_matrix()
-
-# res = rec.get_similar_items(72998)
-
-m = tc.item_similarity_recommender.create(train_data, user_id='end_user_id', item_id='item_id', target='value',)
+rec.calc_cosine_sim_matrix()
 
 # =====================================================
-# get users recommendations and store them in mongodb
+# get items recommendations and store them in mongodb
 # -----------------------------------------------------
-mongo_client = MongoClient()
-mongo_db = mongo_client['recoprism']
-collection = tenant_db_name + "_users"
 
-users = train_data['end_user_id'].unique()
-mongo, count = [], 0
-chuck_size = math.ceil(len(users)/10)
-for user in users:
-	recos = m.recommend(users=[user],k=20)
-	mongo.append({'user_id':int(user), 'items':list(recos['item_id'])})
-	count += 1
-	if count % chuck_size == 0:
-		mongo_db[collection].insert_many(mongo)
-		mongo = []
+items = train_data['item_id'].unique()
+
+mongo_handler.insert_chunk("items",items,rec)

@@ -48,10 +48,10 @@ class ContentBasedRecommender():
 
 
     def get_row_from_db_id(self, item_id):
-        return self.df[self.df.item_id == item_id].index.values[0]
+        return int(self.df[self.df.item_id == item_id].index.values[0])
 
     def get_db_id_from_row(self, index):
-        return self.df[self.df.index == index]['item_id'].values[0]
+        return int(self.df[self.df.index == index]['item_id'].values[0])
 
 
     def __calc_features_weight_sum(self):
